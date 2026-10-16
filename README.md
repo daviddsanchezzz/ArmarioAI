@@ -12,19 +12,20 @@ App mobile-first para gestionar tu ropa con IA.
 ## Requisitos
 
 - Node 22 y pnpm 10 (`corepack enable`)
-- [Supabase CLI](https://supabase.com/docs/guides/local-development) y Docker para la base de datos local
+- Un proyecto de [Supabase](https://supabase.com) en la nube (no hace falta Docker)
 - Expo Go o un simulador para la app
 
-## Arrancar en local
+## Arrancar en desarrollo
 
 ```bash
 pnpm install
 
-# 1. Supabase local: Postgres, Auth y Storage, con las migraciones aplicadas
-pnpm db:start          # muestra la URL, la anon key y la service_role key
+# 1. Base de datos: enlaza tu proyecto de Supabase y aplica las migraciones
+pnpm db:link           # pide el project ref y la contraseña de la base
+pnpm db:push
 
 # 2. API
-cp apps/api/.env.example apps/api/.env      # rellena las claves del paso 1
+cp apps/api/.env.example apps/api/.env      # SUPABASE_URL, anon key y service_role key
 pnpm --filter @armario/shared build
 pnpm --filter @armario/api dev              # http://localhost:4000
 
@@ -33,7 +34,7 @@ cp apps/mobile/.env.example apps/mobile/.env  # URL y anon key de Supabase, URL 
 pnpm --filter @armario/mobile start
 ```
 
-En un móvil físico, `EXPO_PUBLIC_API_URL` y `EXPO_PUBLIC_SUPABASE_URL` deben usar la IP de tu ordenador en la red local, no `localhost`.
+Las claves están en Supabase, en Project Settings → API. En un móvil físico, `EXPO_PUBLIC_API_URL` debe usar la IP de tu ordenador en la red local (o la URL de Railway), no `localhost`.
 
 ## Comandos
 
@@ -41,9 +42,22 @@ En un móvil físico, `EXPO_PUBLIC_API_URL` y `EXPO_PUBLIC_SUPABASE_URL` deben u
 pnpm typecheck   # TypeScript en todos los paquetes
 pnpm lint        # ESLint de la app
 pnpm test        # tests de shared y de la API
-pnpm db:reset    # recrea la base local y vuelve a aplicar las migraciones
+pnpm db:push     # aplica migraciones nuevas al proyecto enlazado
 pnpm db:types    # regenera los tipos de la base de datos
 ```
+
+## Despliegue
+
+| Pieza | Dónde | Configuración |
+|---|---|---|
+| Base de datos, Auth y Storage | Supabase | `pnpm db:push` |
+| API | Railway | `apps/api/railway.json` |
+| App web | Vercel | `apps/mobile/vercel.json` |
+| App iOS/Android | EAS (Expo) | `eas build` cuando toque |
+
+**Railway (API).** Crea un servicio desde este repo con *Root Directory* vacío (la raíz del monorepo) y *Config File Path* `/apps/api/railway.json`. Añade las variables de `apps/api/.env.example` con `NODE_ENV=production`, y en `CORS_ORIGINS` pon el dominio de Vercel. Railway define `PORT` solo.
+
+**Vercel (web).** Importa el repo con *Root Directory* `apps/mobile`. Añade las tres variables `EXPO_PUBLIC_*`, con `EXPO_PUBLIC_API_URL` apuntando a la URL pública de Railway.
 
 ## Cómo encaja
 
@@ -64,10 +78,6 @@ DELETE /garments/:id
 GET    /me
 DELETE /me                    borra cuenta, prendas y fotos
 ```
-
-## Despliegue de la API
-
-`apps/api/Dockerfile` se construye desde la raíz del repo (`docker build -f apps/api/Dockerfile .`). En Railway o Render, apunta el servicio a ese Dockerfile y configura las variables de `apps/api/.env.example`. Para producción, aplica las migraciones con `supabase link` y `supabase db push`.
 
 ## Fases
 

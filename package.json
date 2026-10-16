@@ -2,18 +2,21 @@
   "name": "armario",
   "private": true,
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "db:start": "supabase start",
-    "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > packages/shared/src/database.types.ts"
+    "db:types": "supabase gen types typescript --linked > packages/shared/src/database.types.ts",
+    "db:link": "supabase link",
+    "db:push": "supabase db push"
   },
   "devDependencies": {
-    "turbo": "^2.11.8"
+    "turbo": "^2.11.8",
+    "supabase": "^2.121.0"
   }
 }

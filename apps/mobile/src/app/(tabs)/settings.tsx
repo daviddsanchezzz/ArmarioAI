@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { meApi } from '@/api/garments';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
+import { confirmDestructive } from '@/lib/confirm';
 import { supabase } from '@/lib/supabase';
 import { useSessionStore } from '@/stores/session';
 import { radius, spacing } from '@/theme/tokens';
@@ -20,13 +21,11 @@ export default function SettingsScreen() {
   });
 
   function confirmDelete() {
-    Alert.alert(
+    confirmDestructive(
       '¿Borrar todos tus datos?',
       'Se borrarán tu cuenta, todas tus prendas y todas tus fotos. No se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Borrar todo', style: 'destructive', onPress: () => deleteAccount.mutate() },
-      ],
+      'Borrar todo',
+      () => deleteAccount.mutate(),
     );
   }
 

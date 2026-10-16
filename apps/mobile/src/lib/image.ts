@@ -1,5 +1,6 @@
 import { File } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { Platform } from 'react-native';
 
 const MAX_SIDE = 2048;
 
@@ -15,5 +16,7 @@ export async function prepareForUpload(uri: string, width: number, height: numbe
 }
 
 export async function readFileBytes(uri: string): Promise<ArrayBuffer> {
+  // En web la URI es un blob: o data:, que fetch sabe leer.
+  if (Platform.OS === 'web') return (await fetch(uri)).arrayBuffer();
   return new File(uri).arrayBuffer();
 }

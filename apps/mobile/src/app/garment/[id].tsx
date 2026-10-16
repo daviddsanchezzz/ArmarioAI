@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import type { Garment } from '@armario/shared';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { TagEditor, type TagValues } from '@/components/garments/TagEditor';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +10,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorState, LoadingState } from '@/components/ui/StateViews';
 import { useDeleteGarment, useGarment, useUpdateGarment } from '@/hooks/useGarments';
+import { confirmDestructive } from '@/lib/confirm';
 import { changedTags, tagsFromGarment } from '@/lib/tags';
 import { radius, spacing } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
@@ -36,14 +37,12 @@ function GarmentEditor({ item }: { item: Garment }) {
   const dirty = Object.keys(patch).length > 0;
 
   function confirmDelete() {
-    Alert.alert('¿Borrar esta prenda?', 'Se borrarán la prenda y sus fotos. No se puede deshacer.', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Borrar',
-        style: 'destructive',
-        onPress: () => remove.mutate(id, { onSuccess: () => router.back() }),
-      },
-    ]);
+    confirmDestructive(
+      '¿Borrar esta prenda?',
+      'Se borrarán la prenda y sus fotos. No se puede deshacer.',
+      'Borrar',
+      () => remove.mutate(id, { onSuccess: () => router.back() }),
+    );
   }
 
   return (
